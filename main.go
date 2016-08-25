@@ -3,7 +3,7 @@ package main
 import (
 	"ecms"
 	"flag"
-	"fmt"
+	"time"
 )
 
 var (
@@ -21,15 +21,23 @@ func init() {
 	flag.Parse()
 }
 
-// "user:password@/dbname"
 func main() {
 	ecmsSql := ecms.NewEcmsSql(userName, password, database)
 	if ecmsSql == nil {
 		return
 	}
+	defer ecmsSql.Close()
 
-	articles, _ := ecmsSql.GetHundredArticles(0)
-	for _, article := range articles {
-		fmt.Println(article.String())
+	startId := 0
+	for {
+		articles, lastId := ecmsSql.GetHundredArticles(startId)
+		if len(articles) == 0 {
+			break
+		}
+		startId = lastId
+		for _, article := range articles {
+			article.Dump(log)
+		}
+		time.Sleep(time.Second)
 	}
 }

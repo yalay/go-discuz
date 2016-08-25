@@ -3,21 +3,24 @@ package ecms
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"regexp"
 )
 
 type Article struct {
+	Id       int
 	ClassId  int
 	Title    string
 	Keywords string
 	Body     string
 }
 
-func NewArticle(classId int, title, keywords, body string) *Article {
+func NewArticle(id, classId int, title, keywords, body string) *Article {
 	if title == "" {
 		return nil
 	}
 	return &Article{
+		Id:       id,
 		ClassId:  classId,
 		Title:    title,
 		Keywords: keywords,
@@ -55,4 +58,19 @@ func (article *Article) FormatBodyForDiscuz() {
 			}
 			return "[img]" + newImg + "[/img]\n"
 		})
+}
+
+func (article *Article) Dump(filename string) {
+	articleFile, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Printf("open file err:%v", err)
+		return
+	}
+	defer articleFile.Close()
+
+	if _, err = articleFile.WriteString(article.String()); err != nil {
+		fmt.Printf("write file err:%v", err)
+		return
+	}
+	articleFile.WriteString("\n")
 }
