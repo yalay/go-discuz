@@ -4,6 +4,7 @@ import (
 	"ecms"
 	"flag"
 	"time"
+	"tools"
 )
 
 var (
@@ -11,12 +12,14 @@ var (
 	password string
 	database string
 	log      string
+	dict     string
 )
 
 func init() {
 	flag.StringVar(&userName, "u", "test", "mysql user name")
 	flag.StringVar(&password, "p", "test", "mysql password")
 	flag.StringVar(&database, "d", "test", "mysql database name")
+	flag.StringVar(&dict, "dict", "", "sego dictionary")
 	flag.StringVar(&log, "log", "log", "log file")
 	flag.Parse()
 }
@@ -28,6 +31,7 @@ func main() {
 	}
 	defer ecmsSql.Close()
 
+	keywordsHandler := tools.NewKeywordsHandler(dict)
 	startId := 0
 	for {
 		articles, lastId := ecmsSql.GetHundredArticles(startId)
@@ -36,6 +40,7 @@ func main() {
 		}
 		startId = lastId
 		for _, article := range articles {
+			article.GenKeyWords(keywordsHandler)
 			article.Dump(log)
 		}
 		time.Sleep(time.Second)
