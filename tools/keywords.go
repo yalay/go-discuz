@@ -40,21 +40,24 @@ func (handler *KeywordsHandler) GetKeywords(text string) string {
 
 	keywords := make([]string, 0)
 	segStrs := strings.Fields(segStr)
-	for i, keyword := range segStrs {
+	for i, keywordAttr := range segStrs {
+		if !isNouns(keywordAttr) {
+			continue
+		}
+
+		keyword := removeTail(keywordAttr)
+		if i > 0 {
+			lastkeywordAttr := segStrs[i-1]
+			if isAdjectiveWord(lastkeywordAttr) || isVerb(lastkeywordAttr) {
+				keyword = removeTail(lastkeywordAttr) + keyword
+			}
+		}
+
 		if len(keyword) < MinKeywordLen {
 			continue
 		}
 
-		if !isNouns(keyword) {
-			continue
-		}
-
-		if i > 0 && isAdjectiveWord(segStrs[i-1]) {
-			keywords = append(keywords, removeTail(segStrs[i-1])+removeTail(keyword))
-		} else {
-			keywords = append(keywords, removeTail(keyword))
-		}
-
+		keywords = append(keywords, keyword)
 		if len(keywords) > MaxKeywordNum {
 			break
 		}
@@ -86,6 +89,19 @@ func isAdjectiveWord(keyword string) bool {
 	return false
 }
 
+func isVerb(keyword string) bool {
+	if strings.HasSuffix(keyword, "/v") ||
+		strings.HasSuffix(keyword, "/vd") ||
+		strings.HasSuffix(keyword, "/vn") {
+		return true
+	}
+	return false
+}
+
 func removeTail(keyword string) string {
-	return keyword[:strings.Index(keyword, "/")]
+	tailIdx := strings.Index(keyword, "/")
+	if tailIdx > 0 {
+		return keyword[:strings.Index(keyword, "/")]
+	}
+	return keyword
 }
