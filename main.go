@@ -4,6 +4,7 @@ import (
 	"discuz"
 	"ecms"
 	"flag"
+	"fmt"
 	"tools"
 )
 
@@ -22,9 +23,10 @@ func main() {
 		return
 	}
 
+	fmt.Printf("config:%+v\n", config)
 	// 从ecms的数据库中读取文章，生成文件
 	if config.EnableEcms {
-		ecms.GenArticleFile(config.DataFile, config.EcmsSqlConfig)
+		ecms.GenArticleFile(config.DataFile, config.EcmsSql)
 	}
 
 	discuz.PublishArticleFromFile(config)

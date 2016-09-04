@@ -5,23 +5,25 @@
 		"2": 37,
 		"4": 38,
 		"5": 38,
-		"6": 39,
+		"6": 39
 	},
 	"ecmsSql":{
 		"userName": "test",
 		"password": "test",
-		"database": "test",
-		"dataFile": "log"
+		"database": "test"
 	},
 	"discuzSql":{
 		"userName": "test",
 		"password": "test",
 		"database": "test",
-		"dataFile": "log"
+		"dbPrefix": "pre",
+		"author": "test",
+		"authorId": 1
 	},
 	"enableEcms": true,
 	"enableFidMapping": true,
 	"enableGenKeyword": true,
 	"enableFormatImg":  true,
+	"dataFile": "log",
 	"dict": "data/dictionary.txt"
 }

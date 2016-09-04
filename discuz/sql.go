@@ -4,33 +4,36 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+	"tools"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var author string
-var authorId int
-var dbPrefix = "pre_"
-
 type DiscuzSql struct {
-	db *sql.DB
+	db       *sql.DB
+	dbPrefix string
+	author   string
+	authorId int
 }
 
 // "user:password@/dbname"
-func newDiscuzSql(userName, password, database string) *DiscuzSql {
-	db, err := sql.Open("mysql", userName+":"+password+"@/"+database+"?charset=utf8")
+func newDiscuzSql(sqlCfg *tools.SqlConfig) *DiscuzSql {
+	db, err := sql.Open("mysql", sqlCfg.UserName+":"+sqlCfg.Password+"@/"+sqlCfg.Database+"?charset=utf8")
 	if err != nil {
 		fmt.Printf("new sql err:%v", err)
 		return nil
 	}
 	return &DiscuzSql{
-		db: db,
+		db:       db,
+		dbPrefix: sqlCfg.DbPrefix,
+		author:   sqlCfg.Author,
+		authorId: sqlCfg.AuthorId,
 	}
 }
 
 // 获取文章页id
 func (d *DiscuzSql) GetPostId() int64 {
-	sqlPre, err := d.db.Prepare(`INSERT ` + dbPrefix + `forum_post_tableid (pid) VALUES (?)`)
+	sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `forum_post_tableid (pid) VALUES (?)`)
 	if err != nil {
 		fmt.Printf("Prepare sql err:%v", err)
 		return 0
@@ -52,7 +55,7 @@ func (d *DiscuzSql) GetPostId() int64 {
 
 // 插入thread列表
 func (d *DiscuzSql) InsertThread(article *Article) int64 {
-	sqlPre, err := d.db.Prepare(`INSERT ` + dbPrefix + `forum_thread (fid, subject, author, authorid, 
+	sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `forum_thread (fid, subject, author, authorid, 
 		dateline, lastpost, lastposter) VALUES (?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
 		fmt.Printf("Prepare sql err:%v", err)
@@ -60,7 +63,7 @@ func (d *DiscuzSql) InsertThread(article *Article) int64 {
 	}
 
 	dateLine := time.Now().Unix()
-	sqlResp, err := sqlPre.Exec(article.ClassId, article.Title, author, authorId, dateLine, dateLine, author)
+	sqlResp, err := sqlPre.Exec(article.ClassId, article.Title, d.author, d.authorId, dateLine, dateLine, d.author)
 	if err != nil {
 		fmt.Printf("Exec sql err:%v", err)
 		return 0
@@ -76,7 +79,7 @@ func (d *DiscuzSql) InsertThread(article *Article) int64 {
 }
 
 func (d *DiscuzSql) InsertPost(article *Article, pid, tid int64) {
-	sqlPre, err := d.db.Prepare(`INSERT ` + dbPrefix + `forum_post (pid, fid, tid, first,
+	sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `forum_post (pid, fid, tid, first,
 		author, authorId, subject, dateline, message, usesig, smileyoff, position,
 		tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
@@ -85,7 +88,7 @@ func (d *DiscuzSql) InsertPost(article *Article, pid, tid int64) {
 	}
 
 	dateLine := time.Now().Unix()
-	sqlResp, err := sqlPre.Exec(pid, article.ClassId, tid, 1, author, authorId, article.Title,
+	sqlResp, err := sqlPre.Exec(pid, article.ClassId, tid, 1, d.author, d.authorId, article.Title,
 		dateLine, article.Body, 1, -1, 1, article.Keywords)
 	if err != nil {
 		fmt.Printf("Exec sql err:%v", err)
@@ -95,14 +98,14 @@ func (d *DiscuzSql) InsertPost(article *Article, pid, tid int64) {
 }
 
 func (d *DiscuzSql) UpdateForum(article *Article, tid int64) {
-	sqlPre, err := d.db.Prepare(`UPDATE ` + dbPrefix + `forum_forum SET threads=threads+1,
-		posts=posts+1, todayposts=todayposts+1, lastpost=? WHERE where fid=?`)
+	sqlPre, err := d.db.Prepare(`UPDATE ` + d.dbPrefix + `forum_forum SET threads=threads+1,
+		posts=posts+1, todayposts=todayposts+1, lastpost=? WHERE fid=?`)
 	if err != nil {
 		fmt.Printf("Prepare sql err:%v", err)
 		return
 	}
 
-	lastpost := fmt.Sprintf("%d", tid) + "\t" + article.Title + "\t" + fmt.Sprintf("%d", time.Now().Unix()) + "\t" + author
+	lastpost := fmt.Sprintf("%d", tid) + "\t" + article.Title + "\t" + fmt.Sprintf("%d", time.Now().Unix()) + "\t" + d.author
 	sqlResp, err := sqlPre.Exec(lastpost, article.ClassId)
 	if err != nil {
 		fmt.Printf("Exec sql err:%v", err)

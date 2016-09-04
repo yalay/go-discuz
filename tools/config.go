@@ -13,8 +13,8 @@ type Config struct {
 	EnableGenKeyword bool
 	EnableFormatImg  bool
 
-	EcmsSqlConfig   *SqlConfig
-	DiscuzSqlConfig *SqlConfig
+	EcmsSql   *SqlConfig
+	DiscuzSql *SqlConfig
 
 	DataFile string
 	Dict     string
@@ -24,6 +24,9 @@ type SqlConfig struct {
 	UserName string
 	Password string
 	Database string
+	DbPrefix string
+	Author   string
+	AuthorId int
 }
 
 func LoadConfig(filePath string) *Config {
@@ -36,7 +39,7 @@ func LoadConfig(filePath string) *Config {
 	var cfg = &Config{}
 	err = json.Unmarshal(jsonCfg, cfg)
 	if err != nil {
-		fmt.Printf("json Marshal err:%v", err)
+		fmt.Printf("json Unmarshal err:%v", err)
 		return nil
 	}
 	return cfg

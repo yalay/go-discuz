@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
+	//"io"
 	"os"
 	"regexp"
 	"strings"
@@ -20,7 +20,7 @@ type Article struct {
 
 func PublishArticleFromFile(config *tools.Config) {
 	if config == nil || config.DataFile == "" {
-		fmt.Println("config is empty.")
+		fmt.Println("config is empty.\n")
 		return
 	}
 
@@ -34,13 +34,8 @@ func PublishArticleFromFile(config *tools.Config) {
 	buff := bufio.NewReader(articleFile)
 	for {
 		jsonArticle, err := buff.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-
-			fmt.Printf("Read file err:%v\n", err)
-			continue
+		if err != nil && len(jsonArticle) == 0 {
+			break
 		}
 
 		jsonArticle = strings.TrimSpace(jsonArticle)
@@ -62,7 +57,7 @@ func PublishArticleFromFile(config *tools.Config) {
 			article.genKeyWords(handler)
 		}
 
-		article.publish(config.DiscuzSqlConfig)
+		article.publish(config.DiscuzSql)
 	}
 }
 
@@ -74,7 +69,7 @@ func newArticleFromJson(jsonArticle string) *Article {
 	var newArticle = &Article{}
 	err := json.Unmarshal([]byte(jsonArticle), newArticle)
 	if err != nil {
-		fmt.Printf("json Marshal err:%v\n", err)
+		fmt.Printf("json Unmarshal err:%v\n", err)
 		return nil
 	}
 	return newArticle
@@ -119,7 +114,7 @@ func (article *Article) mappingClassId(config *tools.Config) {
 }
 
 func (article *Article) publish(config *tools.SqlConfig) {
-	discuzSql := newDiscuzSql(config.UserName, config.Password, config.Database)
+	discuzSql := newDiscuzSql(config)
 	if discuzSql == nil {
 		return
 	}
