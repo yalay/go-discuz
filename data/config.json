@@ -16,7 +16,7 @@
 		"userName": "test",
 		"password": "test",
 		"database": "test",
-		"dbPrefix": "pre",
+		"dbPrefix": "pre_",
 		"author": "test",
 		"authorId": 1
 	},
