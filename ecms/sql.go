@@ -3,6 +3,8 @@ package ecms
 import (
 	"database/sql"
 	"fmt"
+	"time"
+	"tools"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -11,8 +13,32 @@ type EcmsSql struct {
 	db *sql.DB
 }
 
+func GenArticleFile(dataFile string, config *tools.SqlConfig) {
+	if config == nil {
+		return
+	}
+	ecmsSql := newEcmsSql(config.UserName, config.Password, config.Database)
+	if ecmsSql == nil {
+		return
+	}
+	defer ecmsSql.close()
+
+	startId := 0
+	for {
+		articles, lastId := ecmsSql.getHundredArticles(startId)
+		if len(articles) == 0 {
+			break
+		}
+		startId = lastId
+		for _, article := range articles {
+			article.Dump(dataFile)
+		}
+		time.Sleep(time.Second)
+	}
+}
+
 // "user:password@/dbname"
-func NewEcmsSql(userName, password, database string) *EcmsSql {
+func newEcmsSql(userName, password, database string) *EcmsSql {
 	db, err := sql.Open("mysql", userName+":"+password+"@/"+database+"?charset=utf8")
 	if err != nil {
 		fmt.Printf("new sql err:%v", err)
@@ -23,8 +49,8 @@ func NewEcmsSql(userName, password, database string) *EcmsSql {
 	}
 }
 
-func (ecms *EcmsSql) GetAllArticle() []*Article {
-	rows, err := ecms.db.Query("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id")
+func (e *EcmsSql) getAllArticle() []*Article {
+	rows, err := e.db.Query("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id")
 	if err != nil {
 		fmt.Printf("query err:%v", err)
 		return nil
@@ -39,15 +65,14 @@ func (ecms *EcmsSql) GetAllArticle() []*Article {
 		if article == nil {
 			continue
 		}
-		article.FormatBodyForDiscuz()
 		articles = append(articles, article)
 	}
 	return articles
 }
 
-func (ecms *EcmsSql) GetHundredArticles(startId int) ([]*Article, int) {
+func (e *EcmsSql) getHundredArticles(startId int) ([]*Article, int) {
 	querySql := fmt.Sprintf("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id where a.id > %d LIMIT 100", startId)
-	rows, err := ecms.db.Query(querySql)
+	rows, err := e.db.Query(querySql)
 	if err != nil {
 		fmt.Printf("query err:%v", err)
 		return nil, startId
@@ -66,12 +91,11 @@ func (ecms *EcmsSql) GetHundredArticles(startId int) ([]*Article, int) {
 		if article == nil {
 			continue
 		}
-		article.FormatBodyForDiscuz()
 		articles = append(articles, article)
 	}
 	return articles, maxId
 }
 
-func (ecms *EcmsSql) Close() {
-	ecms.db.Close()
+func (e *EcmsSql) close() {
+	e.db.Close()
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"tools"
 )
 
 type Article struct {
@@ -59,17 +58,6 @@ func (article *Article) FormatBodyForDiscuz() {
 			}
 			return "[img]" + newImg + "[/img]\n"
 		})
-}
-
-func (article *Article) GenKeyWords(handler *tools.KeywordsHandler) {
-	if handler == nil {
-		return
-	}
-
-	keywords := handler.GetKeywords(article.Title)
-	if len(keywords) >= tools.MinKeywordLen {
-		article.Keywords = keywords
-	}
 }
 
 func (article *Article) Dump(filename string) {

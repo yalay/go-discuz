@@ -14,7 +14,16 @@ type KeywordsHandler struct {
 	seg sego.Segmenter
 }
 
-func NewKeywordsHandler(dict string) *KeywordsHandler {
+var keywordHandler *KeywordsHandler
+
+func GetKeywordsHandler(dict string) *KeywordsHandler {
+	if keywordHandler == nil {
+		return newKeywordsHandler(dict)
+	}
+	return keywordHandler
+}
+
+func newKeywordsHandler(dict string) *KeywordsHandler {
 	if dict == "" {
 		return nil
 	}

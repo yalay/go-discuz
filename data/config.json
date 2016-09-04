@@ -1,0 +1,27 @@
+{
+	"classId": {
+		"3": 2,
+		"1": 36,
+		"2": 37,
+		"4": 38,
+		"5": 38,
+		"6": 39,
+	},
+	"ecmsSql":{
+		"userName": "test",
+		"password": "test",
+		"database": "test",
+		"dataFile": "log"
+	},
+	"discuzSql":{
+		"userName": "test",
+		"password": "test",
+		"database": "test",
+		"dataFile": "log"
+	},
+	"enableEcms": true,
+	"enableFidMapping": true,
+	"enableGenKeyword": true,
+	"enableFormatImg":  true,
+	"dict": "data/dictionary.txt"
+}
