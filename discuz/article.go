@@ -120,6 +120,10 @@ func (article *Article) publish(config *tools.SqlConfig) {
 	}
 	defer discuzSql.Close()
 
+	if discuzSql.CheckTitleExist(article) {
+		return
+	}
+
 	pid := discuzSql.GetPostId()
 	if pid == 0 {
 		fmt.Printf("get pid err. Article:+%v\n", article)

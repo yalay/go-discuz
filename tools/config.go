@@ -9,6 +9,7 @@ import (
 type Config struct {
 	ClassIdMap       map[string]int
 	EnableEcms       bool
+	EnableDiscuz     bool
 	EnableFidMapping bool
 	EnableGenKeyword bool
 	EnableFormatImg  bool

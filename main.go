@@ -29,5 +29,8 @@ func main() {
 		ecms.GenArticleFile(config.DataFile, config.EcmsSql)
 	}
 
-	discuz.PublishArticleFromFile(config)
+	// 从数据文件恢复到数据库中
+	if config.EnableDiscuz {
+		discuz.PublishArticleFromFile(config)
+	}
 }

@@ -1,5 +1,5 @@
 {
-	"classId": {
+	"classIdMap": {
 		"3": 2,
 		"1": 36,
 		"2": 37,
@@ -21,6 +21,7 @@
 		"authorId": 1
 	},
 	"enableEcms": true,
+	"enableDiscuz": true,
 	"enableFidMapping": true,
 	"enableGenKeyword": true,
 	"enableFormatImg":  true,
