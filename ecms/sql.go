@@ -41,9 +41,16 @@ func GenArticleFile(dataFile string, config *tools.SqlConfig) {
 func newEcmsSql(userName, password, database string) *EcmsSql {
 	db, err := sql.Open("mysql", userName+":"+password+"@/"+database+"?charset=utf8")
 	if err != nil {
-		fmt.Printf("new sql err:%v", err)
+		fmt.Printf("new sql err:%v\n", err)
 		return nil
 	}
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Printf("db connect err:%v\n", err)
+		return nil
+	}
+
 	return &EcmsSql{
 		db: db,
 	}
@@ -52,7 +59,7 @@ func newEcmsSql(userName, password, database string) *EcmsSql {
 func (e *EcmsSql) getAllArticle() []*Article {
 	rows, err := e.db.Query("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id")
 	if err != nil {
-		fmt.Printf("query err:%v", err)
+		fmt.Printf("query err:%v\n", err)
 		return nil
 	}
 
@@ -74,7 +81,7 @@ func (e *EcmsSql) getHundredArticles(startId int) ([]*Article, int) {
 	querySql := fmt.Sprintf("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id where a.id > %d LIMIT 100", startId)
 	rows, err := e.db.Query(querySql)
 	if err != nil {
-		fmt.Printf("query err:%v", err)
+		fmt.Printf("query err:%v\n", err)
 		return nil, startId
 	}
 

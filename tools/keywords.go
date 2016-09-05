@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"fmt"
 	"github.com/huichen/sego"
 	"strings"
 )
@@ -49,7 +48,6 @@ func (handler *KeywordsHandler) GetKeywords(text string) string {
 	}
 
 	keywords := make([]string, 0)
-	keywordsIndex := 0
 	segStrs := strings.Fields(segStr)
 	for i, keywordAttr := range segStrs {
 		if !isNouns(keywordAttr) {
@@ -68,14 +66,13 @@ func (handler *KeywordsHandler) GetKeywords(text string) string {
 			continue
 		}
 
-		keywordsIndex++
-		keywords = append(keywords, fmt.Sprintf("%d,%s", keywordsIndex, keyword))
+		keywords = append(keywords, keyword)
 		if len(keywords) > MaxKeywordNum {
 			break
 		}
 	}
 
-	return strings.Join(keywords, " ")
+	return strings.Join(keywords, ",")
 }
 
 func isNouns(keyword string) bool {

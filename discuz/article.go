@@ -132,6 +132,8 @@ func (article *Article) publish(config *tools.SqlConfig) {
 		return
 	}
 
+	// 发布时填写的tags有特定格式，需要带上tagId
+	discuzSql.GenTags(article, tid)
 	discuzSql.InsertPost(article, pid, tid)
 	discuzSql.UpdateForum(article, tid)
 }
