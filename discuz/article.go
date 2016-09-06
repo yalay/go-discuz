@@ -140,5 +140,5 @@ func (article *Article) publish(config *tools.SqlConfig) {
 	discuzSql.GenTags(article, tid)
 	discuzSql.InsertPost(article, pid, tid)
 	discuzSql.UpdateForum(article, tid)
-	time.Sleep(time.Second)
+	time.Sleep(100 * time.Millisecond)
 }
