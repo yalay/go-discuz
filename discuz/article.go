@@ -31,6 +31,12 @@ func PublishArticleFromFile(config *tools.Config) {
 	}
 	defer articleFile.Close()
 
+	discuzSql := newDiscuzSql(config.DiscuzSql)
+	if discuzSql == nil {
+		return
+	}
+	defer discuzSql.Close()
+
 	buff := bufio.NewReader(articleFile)
 	for {
 		jsonArticle, err := buff.ReadString('\n')
@@ -57,7 +63,7 @@ func PublishArticleFromFile(config *tools.Config) {
 			article.genKeyWords(handler)
 		}
 
-		article.publish(config.DiscuzSql)
+		article.publish(discuzSql)
 	}
 }
 
@@ -113,13 +119,7 @@ func (article *Article) mappingClassId(config *tools.Config) {
 	}
 }
 
-func (article *Article) publish(config *tools.SqlConfig) {
-	discuzSql := newDiscuzSql(config)
-	if discuzSql == nil {
-		return
-	}
-	defer discuzSql.Close()
-
+func (article *Article) publish(discuzSql *DiscuzSql) {
 	if discuzSql.CheckTitleExist(article) {
 		return
 	}
