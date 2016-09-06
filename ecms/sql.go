@@ -62,6 +62,7 @@ func (e *EcmsSql) getAllArticle() []*Article {
 		fmt.Printf("query err:%v\n", err)
 		return nil
 	}
+	defer rows.Close()
 
 	articles := make([]*Article, 0)
 	for rows.Next() {
@@ -84,6 +85,7 @@ func (e *EcmsSql) getHundredArticles(startId int) ([]*Article, int) {
 		fmt.Printf("query err:%v\n", err)
 		return nil, startId
 	}
+	defer rows.Close()
 
 	maxId := startId
 	articles := make([]*Article, 0, 100)

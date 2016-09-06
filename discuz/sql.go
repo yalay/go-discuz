@@ -46,6 +46,7 @@ func (d *DiscuzSql) CheckTitleExist(article *Article) bool {
 		fmt.Printf("CheckTitleExist query err:%v\n", err)
 		return true
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var threadId int64
@@ -117,6 +118,8 @@ func (d *DiscuzSql) GenTags(article *Article, tid int64) {
 			fmt.Printf("query err:%v\n", err)
 			return
 		}
+		defer rows.Close()
+
 		var tagId int64
 		if rows.Next() {
 			rows.Scan(&tagId)
