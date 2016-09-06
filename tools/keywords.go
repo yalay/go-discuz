@@ -48,6 +48,7 @@ func (handler *KeywordsHandler) GetKeywords(text string) string {
 	}
 
 	keywords := make([]string, 0)
+	existFlag := make(map[string]bool)
 	segStrs := strings.Fields(segStr)
 	for i, keywordAttr := range segStrs {
 		if !isNouns(keywordAttr) {
@@ -64,6 +65,12 @@ func (handler *KeywordsHandler) GetKeywords(text string) string {
 
 		if len(keyword) < MinKeywordLen {
 			continue
+		}
+
+		if existFlag[keyword] {
+			continue
+		} else {
+			existFlag[keyword] = true
 		}
 
 		keywords = append(keywords, keyword)
