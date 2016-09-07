@@ -55,7 +55,7 @@ func PublishArticleFromFile(config *tools.Config) {
 		}
 
 		if config.EnableFormatImg {
-			article.formatImgLabel()
+			article.formatImgLabel(config)
 		}
 
 		if config.EnableGenKeyword {
@@ -82,7 +82,7 @@ func newArticleFromJson(jsonArticle string) *Article {
 }
 
 // 按照discuz的格式格式化内容
-func (article *Article) formatImgLabel() {
+func (article *Article) formatImgLabel(config *tools.Config) {
 	if article == nil || article.Body == "" {
 		return
 	}
@@ -96,6 +96,10 @@ func (article *Article) formatImgLabel() {
 			if newImg == "" {
 				return ""
 			}
+			if !config.IsImgWhiteList(newImg) {
+				return ""
+			}
+
 			return "[img]" + newImg + "[/img]\n"
 		})
 }
@@ -139,6 +143,5 @@ func (article *Article) publish(discuzSql *DiscuzSql) {
 	// 发布时填写的tags有特定格式，需要带上tagId
 	discuzSql.GenTags(article, tid)
 	discuzSql.InsertPost(article, pid, tid)
-	discuzSql.UpdateForum(article, tid)
 	time.Sleep(100 * time.Millisecond)
 }

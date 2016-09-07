@@ -115,7 +115,7 @@ func (d *DiscuzSql) GenTags(article *Article, tid int64) {
 		querySql := fmt.Sprintf(`SELECT tagid FROM `+d.dbPrefix+`common_tag WHERE tagname="%s" LIMIT 1`, keyword)
 		rows, err := d.db.Query(querySql)
 		if err != nil {
-			fmt.Printf("query err:%v\n", err)
+			fmt.Printf("[GenTags]Query err:%v\n", err)
 			return
 		}
 		defer rows.Close()
@@ -128,19 +128,19 @@ func (d *DiscuzSql) GenTags(article *Article, tid int64) {
 			// 不存在tag需要先创建
 			sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `common_tag (tagname) VALUES(?)`)
 			if err != nil {
-				fmt.Printf("Prepare GenTags sql err:%v\n", err)
+				fmt.Printf("[GenTags]Prepare sql err:%v\n", err)
 				return
 			}
 
 			sqlResp, err := sqlPre.Exec(keyword)
 			if err != nil {
-				fmt.Printf("Exec GenTags sql err:%v\n", err)
+				fmt.Printf("[GenTags]Exec GenTags sql err:%v\n", err)
 				return
 			}
 
 			tagId, err = sqlResp.LastInsertId()
 			if err != nil {
-				fmt.Printf("GenTags get Last insert id err:%v\n", err)
+				fmt.Printf("[GenTags]get Last insert id err:%v\n", err)
 				return
 			}
 			formatKeywords = append(formatKeywords, fmt.Sprintf("%d,%s", tagId, keyword))
@@ -158,20 +158,21 @@ func (d *DiscuzSql) GenTags(article *Article, tid int64) {
 func (d *DiscuzSql) InsertTagItem(tagId, tid int64) {
 	sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `common_tagitem (tagid, itemid, idtype) VALUES(?, ?, "tid")`)
 	if err != nil {
-		fmt.Printf("Prepare InsertTagItem sql err:%v\n", err)
+		fmt.Printf("[InsertTagItem]Prepare sql err:%v\n", err)
 		return
 	}
 	sqlResp, err := sqlPre.Exec(tagId, tid)
 	if err != nil {
-		fmt.Printf("Exec InsertTagItem sql err:%v\n", err)
+		fmt.Printf("[InsertTagItem]Exec sql err:%v\n", err)
 		return
 	}
 
 	rowsAffectedNum, err := sqlResp.RowsAffected()
 	if err != nil || rowsAffectedNum == 0 {
-		fmt.Printf("Rows affected err:%v\n", err)
+		fmt.Printf("[InsertTagItem]Rows affected err:%v\n", err)
 		return
 	}
+	fmt.Printf("[InsertTagItem]Exec sql success, rowsAffected:%d\n", rowsAffectedNum)
 }
 
 func (d *DiscuzSql) InsertPost(article *Article, pid, tid int64) {
@@ -179,7 +180,7 @@ func (d *DiscuzSql) InsertPost(article *Article, pid, tid int64) {
 		author, authorId, subject, dateline, message, usesig, smileyoff, position,
 		tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
 	if err != nil {
-		fmt.Printf("Prepare InsertPost sql err:%v\n", err)
+		fmt.Printf("[InsertPost]Prepare sql err:%v\n", err)
 		return
 	}
 
@@ -187,27 +188,62 @@ func (d *DiscuzSql) InsertPost(article *Article, pid, tid int64) {
 	sqlResp, err := sqlPre.Exec(pid, article.ClassId, tid, 1, d.author, d.authorId, article.Title,
 		dateLine, article.Body, 1, -1, 1, article.Keywords)
 	if err != nil {
-		fmt.Printf("Exec InsertPost sql err:%v\n", err)
+		fmt.Printf("[InsertPost]Exec sql err:%v\n", err)
 		return
 	}
-	fmt.Printf("Exec InsertPost sql success:%v\n", sqlResp)
+
+	rowsAffectedNum, err := sqlResp.RowsAffected()
+	if err != nil || rowsAffectedNum == 0 {
+		fmt.Printf("[InsertPost]Rows affected err:%v\n", err)
+		return
+	}
+	d.UpdateForum(article, tid)
+	d.UpdateAuthor()
+	fmt.Printf("[InsertPost]Exec sql success, rowsAffected:%d\n", rowsAffectedNum)
 }
 
 func (d *DiscuzSql) UpdateForum(article *Article, tid int64) {
 	sqlPre, err := d.db.Prepare(`UPDATE ` + d.dbPrefix + `forum_forum SET threads=threads+1,
 		posts=posts+1, todayposts=todayposts+1, lastpost=? WHERE fid=?`)
 	if err != nil {
-		fmt.Printf("Prepare UpdateForum sql err:%v\n", err)
+		fmt.Printf("[UpdateForum]Prepare sql err:%v\n", err)
 		return
 	}
 
 	lastpost := fmt.Sprintf("%d", tid) + "\t" + article.Title + "\t" + fmt.Sprintf("%d", time.Now().Unix()) + "\t" + d.author
 	sqlResp, err := sqlPre.Exec(lastpost, article.ClassId)
 	if err != nil {
-		fmt.Printf("Exec UpdateForum sql err:%v\n", err)
+		fmt.Printf("[UpdateForum]Exec sql err:%v\n", err)
 		return
 	}
-	fmt.Printf("Exec UpdateForum sql success:%v\n", sqlResp)
+
+	rowsAffectedNum, err := sqlResp.RowsAffected()
+	if err != nil || rowsAffectedNum == 0 {
+		fmt.Printf("[UpdateForum]Rows affected err:%v\n", err)
+		return
+	}
+	fmt.Printf("[UpdateForum]Exec sql success, rowsAffected:%d\n", rowsAffectedNum)
+}
+
+func (d *DiscuzSql) UpdateAuthor() {
+	sqlPre, err := d.db.Prepare(`UPDATE ` + d.dbPrefix + `common_member_count SET threads=threads+1,
+		posts=posts+1 WHERE uid=?`)
+	if err != nil {
+		fmt.Printf("[UpdateAuthor]Prepare sql err:%v\n", err)
+		return
+	}
+
+	sqlResp, err := sqlPre.Exec(d.authorId)
+	if err != nil {
+		fmt.Printf("[UpdateAuthor]Exec sql err:%v\n", err)
+		return
+	}
+	rowsAffectedNum, err := sqlResp.RowsAffected()
+	if err != nil || rowsAffectedNum == 0 {
+		fmt.Printf("[UpdateAuthor]Rows affected err:%v\n", err)
+		return
+	}
+	fmt.Printf("[UpdateAuthor]Exec sql success, rowsAffected:%d\n", rowsAffectedNum)
 }
 
 func (d *DiscuzSql) Close() {

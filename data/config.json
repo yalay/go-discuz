@@ -25,6 +25,8 @@
 	"enableFidMapping": true,
 	"enableGenKeyword": true,
 	"enableFormatImg":  true,
+
 	"dataFile": "log",
-	"dict": "data/dictionary.txt"
+	"dict": "data/dictionary.txt",
+	"imgWhiteList": []
 }

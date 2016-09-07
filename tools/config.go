@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 )
 
 type Config struct {
@@ -19,7 +20,11 @@ type Config struct {
 
 	DataFile string
 	Dict     string
+
+	ImgWhiteList []string
 }
+
+var imgWhiteListSet map[string]bool
 
 type SqlConfig struct {
 	UserName string
@@ -51,4 +56,17 @@ func (c *Config) GetMappingFid(oriClassId int) int {
 		return curClassId
 	}
 	return 0
+}
+
+func (c *Config) IsImgWhiteList(imgUrl string) bool {
+	if len(c.ImgWhiteList) == 0 {
+		return true
+	}
+
+	for _, whiteDomain := range c.ImgWhiteList {
+		if strings.Contains(imgUrl, whiteDomain) {
+			return true
+		}
+	}
+	return false
 }

@@ -59,7 +59,7 @@ func newEcmsSql(userName, password, database string) *EcmsSql {
 func (e *EcmsSql) getAllArticle() []*Article {
 	rows, err := e.db.Query("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id")
 	if err != nil {
-		fmt.Printf("query err:%v\n", err)
+		fmt.Printf("[getAllArticle]Query err:%v\n", err)
 		return nil
 	}
 	defer rows.Close()
@@ -82,7 +82,7 @@ func (e *EcmsSql) getHundredArticles(startId int) ([]*Article, int) {
 	querySql := fmt.Sprintf("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id where a.id > %d LIMIT 100", startId)
 	rows, err := e.db.Query(querySql)
 	if err != nil {
-		fmt.Printf("query err:%v\n", err)
+		fmt.Printf("[getAllArticle]query err:%v\n", err)
 		return nil, startId
 	}
 	defer rows.Close()
