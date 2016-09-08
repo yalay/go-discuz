@@ -255,13 +255,13 @@ func (d *DiscuzSql) InsertCover(article *Article, tid int64) {
 		isRemote = 1
 	}
 
-	sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `forum_threadimage (tid, attachment, remote) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE`)
+	sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `forum_threadimage (tid, attachment, remote) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE attachment=?, remote=?`)
 	if err != nil {
 		fmt.Printf("[InsertCover]Prepare sql err:%v\n", err)
 		return
 	}
 
-	sqlResp, err := sqlPre.Exec(tid, article.Cover, isRemote)
+	sqlResp, err := sqlPre.Exec(tid, article.Cover, isRemote, article.Cover, isRemote)
 	if err != nil {
 		fmt.Printf("[InsertCover]Exec sql err:%v\n", err)
 		return
