@@ -28,5 +28,6 @@
 
 	"dataFile": "log",
 	"dict": "data/dictionary.txt",
-	"imgWhiteList": []
+	"imgWhiteList": [],
+	"thumbParam": "?s=239x319"
 }

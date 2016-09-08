@@ -23,6 +23,7 @@ type Config struct {
 	Dict     string
 
 	ImgWhiteList []string
+	ThumbParam   string
 }
 
 var imgWhiteListSet map[string]bool

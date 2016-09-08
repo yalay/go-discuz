@@ -60,7 +60,7 @@ func PublishArticleFromFile(config *tools.Config) {
 		}
 
 		if config.EnableGenCover {
-			article.GenCover()
+			article.genCover(config)
 		}
 
 		if config.EnableGenKeyword {
@@ -128,7 +128,7 @@ func (article *Article) mappingClassId(config *tools.Config) {
 	}
 }
 
-func (article *Article) GenCover() {
+func (article *Article) genCover(config *tools.Config) {
 	if article.Cover != "" {
 		return
 	}
@@ -136,7 +136,7 @@ func (article *Article) GenCover() {
 	coverReg := regexp.MustCompile(`http:\S+\.(?i:jpg|jpeg|gif|png|webp)`)
 	coverImg := coverReg.FindString(article.Cover)
 	if coverImg != "" {
-		article.Cover = coverImg
+		article.Cover = coverImg + config.ThumbParam
 	}
 }
 
