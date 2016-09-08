@@ -14,6 +14,7 @@ type Config struct {
 	EnableFidMapping bool
 	EnableGenKeyword bool
 	EnableFormatImg  bool
+	EnableGenCover   bool
 
 	EcmsSql   *SqlConfig
 	DiscuzSql *SqlConfig

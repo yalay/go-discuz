@@ -11,11 +11,12 @@ type Article struct {
 	Id       int
 	ClassId  int
 	Title    string
+	Cover    string
 	Keywords string
 	Body     string
 }
 
-func NewArticle(id, classId int, title, keywords, body string) *Article {
+func NewArticle(id, classId int, title, cover, keywords, body string) *Article {
 	if title == "" {
 		return nil
 	}
@@ -23,6 +24,7 @@ func NewArticle(id, classId int, title, keywords, body string) *Article {
 		Id:       id,
 		ClassId:  classId,
 		Title:    title,
+		Cover:    cover,
 		Keywords: keywords,
 		Body:     body,
 	}

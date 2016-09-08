@@ -246,6 +246,55 @@ func (d *DiscuzSql) UpdateAuthor() {
 	fmt.Printf("[UpdateAuthor]Exec sql success, rowsAffected:%d\n", rowsAffectedNum)
 }
 
+func (d *DiscuzSql) InsertCover(article *Article, tid int64) {
+	if article.Cover == "" {
+		return
+	}
+	isRemote := 0
+	if strings.HasPrefix(article.Cover, "http") {
+		isRemote = 1
+	}
+
+	sqlPre, err := d.db.Prepare(`INSERT ` + d.dbPrefix + `forum_threadimage (tid, attachment, remote) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE`)
+	if err != nil {
+		fmt.Printf("[InsertCover]Prepare sql err:%v\n", err)
+		return
+	}
+
+	sqlResp, err := sqlPre.Exec(tid, article.Cover, isRemote)
+	if err != nil {
+		fmt.Printf("[InsertCover]Exec sql err:%v\n", err)
+		return
+	}
+
+	d.UpdateThreadCover(article, tid)
+	rowsAffectedNum, err := sqlResp.RowsAffected()
+	if err != nil || rowsAffectedNum == 0 {
+		fmt.Printf("[InsertCover]Rows affected err:%v\n", err)
+		return
+	}
+	fmt.Printf("[InsertCover]Exec sql success, rowsAffected:%d\n", rowsAffectedNum)
+}
+
+func (d *DiscuzSql) UpdateThreadCover(article *Article, tid int64) {
+	sqlPre, err := d.db.Prepare(`UPDATE ` + d.dbPrefix + `forum_thread SET cover=1 WHERE tid=?`)
+	if err != nil {
+		fmt.Printf("[UpdateThreadCover]Prepare sql err:%v\n", err)
+		return
+	}
+
+	sqlResp, err := sqlPre.Exec(tid)
+	if err != nil {
+		fmt.Printf("[UpdateThreadCover]Exec sql err:%v\n", err)
+		return
+	}
+	rowsAffectedNum, err := sqlResp.RowsAffected()
+	if err != nil || rowsAffectedNum == 0 {
+		fmt.Printf("[UpdateThreadCover]Rows affected err:%v\n", err)
+		return
+	}
+}
+
 func (d *DiscuzSql) Close() {
 	d.db.Close()
 }

@@ -57,7 +57,7 @@ func newEcmsSql(userName, password, database string) *EcmsSql {
 }
 
 func (e *EcmsSql) getAllArticle() []*Article {
-	rows, err := e.db.Query("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id")
+	rows, err := e.db.Query("SELECT a.id, a.classid, a.title, a.titlepic, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id")
 	if err != nil {
 		fmt.Printf("[getAllArticle]Query err:%v\n", err)
 		return nil
@@ -67,9 +67,9 @@ func (e *EcmsSql) getAllArticle() []*Article {
 	articles := make([]*Article, 0)
 	for rows.Next() {
 		var curId, classId int
-		var title, keywords, body string
+		var title, cover, keywords, body string
 		rows.Scan(&curId, &classId, &title, &keywords, &body)
-		article := NewArticle(curId, classId, title, keywords, body)
+		article := NewArticle(curId, classId, title, cover, keywords, body)
 		if article == nil {
 			continue
 		}
@@ -79,7 +79,7 @@ func (e *EcmsSql) getAllArticle() []*Article {
 }
 
 func (e *EcmsSql) getHundredArticles(startId int) ([]*Article, int) {
-	querySql := fmt.Sprintf("SELECT a.id, a.classid, a.title, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id where a.id > %d LIMIT 100", startId)
+	querySql := fmt.Sprintf("SELECT a.id, a.classid, a.title, a.titlepic, a.ftitle, b.newstext FROM phome_ecms_news a LEFT JOIN phome_ecms_news_data_1 b on a.id=b.id where a.id > %d LIMIT 100", startId)
 	rows, err := e.db.Query(querySql)
 	if err != nil {
 		fmt.Printf("[getAllArticle]query err:%v\n", err)
@@ -91,12 +91,12 @@ func (e *EcmsSql) getHundredArticles(startId int) ([]*Article, int) {
 	articles := make([]*Article, 0, 100)
 	for rows.Next() {
 		var curId, classId int
-		var title, keywords, body string
-		rows.Scan(&curId, &classId, &title, &keywords, &body)
+		var title, cover, keywords, body string
+		rows.Scan(&curId, &classId, &title, &cover, &keywords, &body)
 		if curId > maxId {
 			maxId = curId
 		}
-		article := NewArticle(curId, classId, title, keywords, body)
+		article := NewArticle(curId, classId, title, cover, keywords, body)
 		if article == nil {
 			continue
 		}

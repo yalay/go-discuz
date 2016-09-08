@@ -14,6 +14,7 @@ import (
 type Article struct {
 	ClassId  int
 	Title    string
+	Cover    string
 	Keywords string
 	Body     string
 }
@@ -56,6 +57,10 @@ func PublishArticleFromFile(config *tools.Config) {
 
 		if config.EnableFormatImg {
 			article.formatImgLabel(config)
+		}
+
+		if config.EnableGenCover {
+			article.GenCover()
 		}
 
 		if config.EnableGenKeyword {
@@ -120,6 +125,18 @@ func (article *Article) mappingClassId(config *tools.Config) {
 	fid := config.GetMappingFid(article.ClassId)
 	if fid != 0 {
 		article.ClassId = fid
+	}
+}
+
+func (article *Article) GenCover() {
+	if article.Cover != "" {
+		return
+	}
+
+	coverReg := regexp.MustCompile(`http:\S+\.(?i:jpg|jpeg|gif|png|webp)`)
+	coverImg := coverReg.FindString(article.Cover)
+	if coverImg != "" {
+		article.Cover = coverImg
 	}
 }
 
