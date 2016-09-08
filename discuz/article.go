@@ -134,7 +134,7 @@ func (article *Article) genCover(config *tools.Config) {
 	}
 
 	coverReg := regexp.MustCompile(`http:\S+\.(?i:jpg|jpeg|gif|png|webp)`)
-	coverImg := coverReg.FindString(article.Cover)
+	coverImg := coverReg.FindString(article.Body)
 	if coverImg != "" {
 		article.Cover = coverImg + config.ThumbParam
 	}
