@@ -25,6 +25,7 @@
 	"enableFidMapping": true,
 	"enableGenKeyword": true,
 	"enableFormatImg":  true,
+	"enableGenCover": true,
 
 	"dataFile": "log",
 	"dict": "data/dictionary.txt",

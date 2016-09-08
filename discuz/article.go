@@ -157,7 +157,7 @@ func (article *Article) publish(discuzSql *DiscuzSql) {
 		return
 	}
 
-	// 发布时填写的tags有特定格式，需要带上tagId
+	discuzSql.InsertCover(article, tid)
 	discuzSql.GenTags(article, tid)
 	discuzSql.InsertPost(article, pid, tid)
 	time.Sleep(100 * time.Millisecond)
